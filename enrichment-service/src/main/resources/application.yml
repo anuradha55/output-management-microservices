@@ -1,6 +1,5 @@
 server:
   port: 8083
-
 spring:
   application:
     name: enrichment-service
@@ -15,13 +14,30 @@ spring:
         spring.json.trusted.packages: com.output.management.common.event
         spring.json.value.default.type: com.output.management.common.event.DocumentValidatedEvent
         spring.json.use.type.headers: false
-
+    listener:
+      ack-mode: record
+clients:
+  customer:
+    base-url: ${CUSTOMER_SERVICE_URL:http://localhost:8084}
+  account:
+    base-url: ${ACCOUNT_SERVICE_URL:http://localhost:8085}
+resilience4j:
+  circuitbreaker:
+    instances:
+      downstream:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+  retry:
+    instances:
+      downstream:
+        max-attempts: 3
+        wait-duration: 500ms
+  timelimiter:
+    instances:
+      downstream:
+        timeout-duration: 2s
 management:
   endpoints:
     web:
       exposure:
         include: health,info
-  endpoint:
-    health:
-      probes:
-        enabled: true
